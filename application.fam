@@ -1,0 +1,17 @@
+App(
+    appid="text_editor",
+    name="TXT editor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="text_editor_app",
+    cdefines=["APP_TEXT_EDITOR"],
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon="icons/text_editor_10px.png",
+    fap_category="Tools",
+    fap_author="@Fortunate",
+    fap_version="1.0",
+    fap_description="Edit text files without a computer or smartphone.",
+)
