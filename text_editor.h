@@ -16,6 +16,7 @@ typedef struct {
 struct TextEditorApp {
     Gui* gui;
     ViewPort* view_port;
+    FuriMessageQueue* event_queue;
 };
 
 typedef struct TextEditorApp TextEditorApp;
