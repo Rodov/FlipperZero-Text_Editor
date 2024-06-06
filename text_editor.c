@@ -1,37 +1,36 @@
 // *********************************
-// Подключаем стандартные библиотеки
+// Подключаем библиотеки и структуры
 // *********************************
-#include <stdio.h>
-#include <furi.h>
-#include <gui/gui.h>
-#include <gui/elements.h>
-#include <input/input.h>
-#include <notification/notification_messages.h>
-// Подключаем наше описание структур в программе
 #include <text_editor.h>
 
 // *****************
 // Функция отрисовки
 // *****************
 static void text_editor_app_draw_callback(Canvas* canvas, void* ctx) {
-    UNUSED(ctx);
+    furi_assert(ctx);
+    TextEditorApp* app = ctx;
 
     // Очищаем канву
     canvas_clear(canvas);
 
-    // Выводим первую строку
+    // Пишем на экране режим работы
+    DrawMode mode = app->draw_mode;
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 4, 8, "Hello world!");
+    canvas_draw_str(canvas, 4, 8, "Draw Mode");
 
-    // Выводим последующие строки
-    canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(
-        canvas,
-        127,
-        15,
-        AlignRight,
-        AlignTop,
-        "Some long long long long \n aligned multiline text");
+    if(mode == INSTRUCTION) { // РЕЖИМ отображения инструкции
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 4, 20, "Instruction");
+    } else if(mode == VIEWING) { // РЕЖИМ просмотра файла
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 4, 20, "Viewing");
+    } else if(mode == EDITING) { // РЕЖИМ редактирования файла
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 4, 20, "Editing");
+    } else { // РЕЖИМ неопознан
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 4, 20, "Something wrong!");
+    }
 }
 
 // ***********************************
@@ -55,7 +54,7 @@ TextEditorApp* text_editor_app_alloc() {
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     // Подключаем обработчики
-    view_port_draw_callback_set(app->view_port, text_editor_app_draw_callback, NULL);
+    view_port_draw_callback_set(app->view_port, text_editor_app_draw_callback, app);
     view_port_input_callback_set(app->view_port, text_editor_app_input_callback, app->event_queue);
 
     app->gui = furi_record_open(RECORD_GUI);
