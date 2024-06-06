@@ -97,16 +97,24 @@ int32_t text_editor_app(void* p) {
             DrawMode mode = app->draw_mode;
 
             // ...и обрабатываем нажатия кнопок
-            if((event.type == InputTypeLong || (event.type == InputTypePress && mode == 0)) && event.key == InputKeyBack)
-                break; // Если нажали Назад на первом экране или зажали - выход из программы
+
+            // Если нажали Назад на первом экране или зажали - выход из программы
+            if((event.type == InputTypeLong || (event.type == InputTypePress && mode == 0)) && event.key == InputKeyBack) 
+                break; 
+
             else if(event.type == InputTypePress) {
-                if(event.key == InputKeyBack) { // Если нажали Назад - возвращаемся в предыдущий режим
-                    app->draw_mode = (mode - 1 + TOTAL_DRAW_MODES) % TOTAL_DRAW_MODES;
-                } else if(event.key == InputKeyOk) { // Если нажали ОК - идем в следующий режим
-                    app->draw_mode = (mode + 1 + TOTAL_DRAW_MODES) % TOTAL_DRAW_MODES;
+
+                // Если нажали Назад - возвращаемся в предыдущий режим
+                if(event.key == InputKeyBack && mode > 0) { 
+                    app->draw_mode = (mode - 1);
+                    
+                    // Если нажали ОК - идем в следующий режим
+                } else if(event.key == InputKeyOk && mode < 2) { 
+                    app->draw_mode = (mode + 1);
                 }
             }
-
+            
+            // Обновляем экран
             view_port_update(app->view_port);
         }
     }
