@@ -94,11 +94,20 @@ int32_t text_editor_app(void* p) {
     while(1) {
         // Считываем очередь...
         if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
+            DrawMode mode = app->draw_mode;
+
             // ...и обрабатываем нажатия кнопок
-            if(event.type == InputTypePress) {
-                // Если нажали Назад - выход из программы
-                if(event.key == InputKeyBack) break;
+            if((event.type == InputTypeLong || (event.type == InputTypePress && mode == 0)) && event.key == InputKeyBack)
+                break; // Если нажали Назад на первом экране или зажали - выход из программы
+            else if(event.type == InputTypePress) {
+                if(event.key == InputKeyBack) { // Если нажали Назад - возвращаемся в предыдущий режим
+                    app->draw_mode = (mode - 1 + TOTAL_DRAW_MODES) % TOTAL_DRAW_MODES;
+                } else if(event.key == InputKeyOk) { // Если нажали ОК - идем в следующий режим
+                    app->draw_mode = (mode + 1 + TOTAL_DRAW_MODES) % TOTAL_DRAW_MODES;
+                }
             }
+
+            view_port_update(app->view_port);
         }
     }
 
