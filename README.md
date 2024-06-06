@@ -1,5 +1,5 @@
-![Alt text](assets\in_progress.png?raw=true "In progress")
+![In progress](https://github.com/Rodov/FlipperZero-Text_Editor/assets/in_progress.png)
 
 The project is just started, so the Editor isn't working yet
 
-![Alt text](assets\workflow_diagram.png?raw=true "In progress")
+![Диаграма потока](https://github.com/Rodov/FlipperZero-Text_Editor/blob/main/assets/workflow_diagram.jpg))
