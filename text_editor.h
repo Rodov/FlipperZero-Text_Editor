@@ -9,10 +9,12 @@
 #include <notification/notification_messages.h>
 
 typedef enum {
-    INSTRUCTION,
+    START,
     VIEWING,
     EDITING,
-    TOTAL_DRAW_MODES = 3,
+    ABOUT,
+    INSTRUCTION,
+    TOTAL_DRAW_MODES = 5,
 } DrawMode;
 
 // Структура программы

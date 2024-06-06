@@ -9,27 +9,47 @@
 static void text_editor_app_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
     TextEditorApp* app = ctx;
+    DrawMode mode = app->draw_mode;
 
-    // Очищаем канву
+    // Очищаем холст
     canvas_clear(canvas);
 
-    // Пишем на экране режим работы
-    DrawMode mode = app->draw_mode;
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 4, 8, "Draw Mode");
-
-    if(mode == INSTRUCTION) { // РЕЖИМ отображения инструкции
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 4, 20, "Instruction");
-    } else if(mode == VIEWING) { // РЕЖИМ просмотра файла
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 4, 20, "Viewing");
-    } else if(mode == EDITING) { // РЕЖИМ редактирования файла
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 4, 20, "Editing");
-    } else { // РЕЖИМ неопознан
+    if(mode == START) { // РЕЖИМ - Стартовый экран
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 4, 20, "Something wrong!");
+        canvas_draw_str(canvas, 8, 8, "Text Viewer");
+        elements_button_center(canvas, "File");
+        elements_button_left(canvas, "About");
+        elements_button_right(canvas, "Usage");
+
+    } else if(mode == VIEWING) { // РЕЖИМ - Просмотр файла
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 8, 8, "Text Viewer");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 4, 20, "Mode: Viewing");
+
+    } else if(mode == EDITING) { // РЕЖИМ - Редактирование файла
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 8, 8, "Text Viewer");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 4, 20, "Mode: Editing");
+
+    } else if(mode == ABOUT) { // РЕЖИМ - О программе
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 8, 8, "Text Viewer");
+        canvas_set_font(canvas, FontSecondary);
+        elements_multiline_text_aligned(canvas, 0, 14, AlignLeft, AlignTop, "Author: Fortunate \nVersion: 1.0 \nBuild: 06.06.2024");
+    
+    } else if(mode == INSTRUCTION) { // РЕЖИМ - Инструкция по использованию
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 8, 8, "Instruction");
+        canvas_set_font(canvas, FontSecondary);
+        elements_multiline_text_aligned(canvas, 0, 14, AlignLeft, AlignTop, "1.  Choose file \n2. View and choose edit point \n3. Edit & save");
+
+    } else { // Обработка ошибок, РЕЖИМ неопознан
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 43, 20, "ERROR!");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 23, 35, "Unrecognized mode");
     }
 }
 
@@ -69,7 +89,7 @@ TextEditorApp* text_editor_app_alloc() {
 void text_editor_app_free(TextEditorApp* app) {
     furi_assert(app);
 
-    // Закрываем Вьюпорт
+    // Закрываем порт просмотра
     view_port_enabled_set(app->view_port, false);
     gui_remove_view_port(app->gui, app->view_port);
     view_port_free(app->view_port);
@@ -92,28 +112,43 @@ int32_t text_editor_app(void* p) {
     InputEvent event;
 
     while(1) {
+
         // Считываем очередь...
         if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
             DrawMode mode = app->draw_mode;
 
-            // ...и обрабатываем нажатия кнопок
-
-            // Если нажали Назад на первом экране или зажали - выход из программы
+            // ...и обрабатываем нажатия кнопок:
+            // Если зажали Назад или нажали Назад на первом экране - выход из программы
             if((event.type == InputTypeLong || (event.type == InputTypePress && mode == 0)) && event.key == InputKeyBack) 
                 break; 
 
-            else if(event.type == InputTypePress) {
+            if(event.type == InputTypePress) {
 
+                if(event.key == InputKeyBack && (mode == 3 || mode == 4)) { 
+                    app->draw_mode = (mode = 0);
+                    
                 // Если нажали Назад - возвращаемся в предыдущий режим
-                if(event.key == InputKeyBack && mode > 0) { 
+                } else if(event.key == InputKeyBack && mode > 0) { 
                     app->draw_mode = (mode - 1);
                     
-                    // Если нажали ОК - идем в следующий режим
+                // Если нажали ОК - идем в следующий режим
                 } else if(event.key == InputKeyOk && mode < 2) { 
                     app->draw_mode = (mode + 1);
+
+                // Если нажали Left - О программе
+                } else if(event.key == InputKeyLeft && mode == 0) { 
+                    app->draw_mode = (mode=3);
+
+                // Если нажали Right - Инструкция, как пользоваться
+                } else if(event.key == InputKeyRight && mode == 0) { 
+                    app->draw_mode = (mode=4);
+
+                // Если нажали Up - для отладочных целей (впоследствии удалить!!!)
+                } else if(event.key == InputKeyUp && mode == 0) { 
+                    app->draw_mode = (mode=7);
                 }
             }
-            
+
             // Обновляем экран
             view_port_update(app->view_port);
         }
