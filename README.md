@@ -1,4 +1,4 @@
-![In progress](https://github.com/Rodov/FlipperZero-Text_Editor/assets/in_progress.png)
+![In progress](https://github.com/Rodov/FlipperZero-Text_Editor/blob/main/assets/in_progress.png)
 
 The project is just started, so the Editor isn't working yet
 
